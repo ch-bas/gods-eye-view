@@ -60,6 +60,21 @@ test('the position-only declaration survives normalizeSourceItem', () => {
   assert.equal(isPositionOnlySource(normalized), true);
 });
 
+test('the register model passes through to the source contract', () => {
+  const [bosch, anpr, blank] = normalizeAmsterdamCameraRecords([
+    row({ objectnummer: 'CAM-1', model: '  Bosch MIC-7522-Z30x ' }),
+    row({ objectnummer: 'CAM-2', model: 'CSG-8800' }),
+    row({ objectnummer: 'CAM-3', model: '' }),
+  ]);
+  assert.equal(bosch.model, 'Bosch MIC-7522-Z30x');
+  assert.equal(normalizeSourceItem(bosch).model, 'Bosch MIC-7522-Z30x');
+  assert.equal(anpr.model, 'CSG-8800');
+  // A blank model is omitted, never an empty string; the register names no
+  // manufacturer field, so none is invented.
+  assert.equal('model' in blank, false);
+  assert.equal('manufacturer' in bosch, false);
+});
+
 test('every row takes the headingless low-confidence RAW PRIOR pose', () => {
   // The register carries no bearing for ANY camera, so no row may claim a
   // measured heading. Same personality as the headingless TfL rows.

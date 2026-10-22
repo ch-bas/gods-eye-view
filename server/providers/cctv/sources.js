@@ -2265,7 +2265,7 @@ export function normalizeAmsterdamCameraRecords(records) {
     else if (street) name = street;
     else name = `${typeLabel || 'Traffic camera'} ${assetNumber}`;
 
-    cameras.push({
+    const camera = {
       id: cameraId,
       name,
       city: 'Amsterdam',
@@ -2291,7 +2291,15 @@ export function normalizeAmsterdamCameraRecords(records) {
       sourceKind: 'amsterdam-open-data',
       license:
         'Public camera register, Gemeente Amsterdam (positions only — no public frames)',
-    });
+    };
+    // The register's `model` names the hardware ("Bosch MIC-7522-Z30x",
+    // "CSG-8800"); the client resolves it against the datasheet table, and
+    // an unknown model simply stays unresolved. Blank on ~1 row in 5.
+    const model = String(record.model || '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (model) camera.model = model;
+    cameras.push(camera);
   }
 
   return cameras;
